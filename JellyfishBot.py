@@ -4,7 +4,7 @@ from discord.ext import commands
 import os
 from datetime import datetime
 
-from config import *
+from config import TOKEN
 
 bot = commands.Bot(command_prefix="==")
 
@@ -13,8 +13,7 @@ bot.start_time = datetime.now()
 # sets activity to watching you catch jellies
 @bot.event
 async def on_ready():
-    print(f"Username: {bot.user} \n User id: {bot.user.id}")
-    print(f"Latency: {round(bot.latency * 1000, 3)}ms")
+    print(f"Username: {bot.user}")
     await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="you catch jellies"))
 
 # gets uptime of the bot (time it has been up since the last restart)
@@ -35,18 +34,20 @@ async def reload(ctx, cog: str=None):
     try:
         if cog is None:
             for filename in os.listdir("./cogs"):
-                if filename.endswith(".py") and not filename.startswith("_"):
+                if filename.endswith(".py") and not filename.startswith("_") and not filename.startswith("jellyspawn"):
                     bot.unload_extension(f"cogs.{filename[:-3]}")
                     bot.load_extension(f"cogs.{filename[:-3]}")
             cog = "all cogs"
         else:
-            cog = cog.lower()
-            bot.unload_extension(f"cogs.{cog}")
-            bot.load_extension(f"cogs.{cog}")
+            if not cog.startswith("jellyspawn"):
+                cog = cog.lower()
+                bot.unload_extension(f"cogs.{cog}")
+                bot.load_extension(f"cogs.{cog}")
+            else:
+                ctx.send("**Please do not restart jellyspawn.py.\nIf you really want to please restart the bot.**")
 
     except Exception as error:
         await ctx.send(f"{cog} could'nt be reloaded")
-        raise error
 
     await ctx.send(f"Successfully reloaded {cog}")
 
@@ -54,7 +55,6 @@ async def reload(ctx, cog: str=None):
 for filename in os.listdir(r"./cogs"):
     if filename.endswith(".py") and not filename.startswith("_"):
         try:
-            print(filename)
             bot.load_extension(f"cogs.{filename[:-3]}")
         except Exception as error:
             print(f"{filename} could'nt be loaded")
