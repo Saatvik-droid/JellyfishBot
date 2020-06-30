@@ -6,7 +6,7 @@ from datetime import datetime
 
 from config import TOKEN
 
-bot = commands.Bot(command_prefix="==")
+bot = commands.Bot(command_prefix=commands.when_mentioned_or("=="))
 
 bot.start_time = datetime.now()
 
