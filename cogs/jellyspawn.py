@@ -16,17 +16,24 @@ class JellySpawn(commands.Cog):
         self.random_spawner.start()
 
     # spawns a random jelly
+    # currently doesnt stack but remove inner if cases to stack
     async def spawn_jelly(self, channel_id: int = None):
         jelly = await self.jelly_obj.get_random_jelly()
         if channel_id is not None:
             channel = self.bot.get_channel(channel_id)
             await channel.send(file=discord.File(jelly))
-            CATCH_PENDING_ID.append(channel_id)
+            if channel_id not in CATCH_PENDING_ID:
+                CATCH_PENDING_ID.append(channel_id)
+            else:
+                pass
         else:
             for channel_id in SPAWN_CHANNELS_ID:
                 channel = self.bot.get_channel(channel_id)
                 await channel.send(file=discord.File(jelly))
-                CATCH_PENDING_ID.append(channel_id)
+                if channel_id not in CATCH_PENDING_ID:
+                    CATCH_PENDING_ID.append(channel_id)
+                else:
+                    pass
 
     # spawns random jelly every 5-30 mins
     @tasks.loop(seconds=5.0)
