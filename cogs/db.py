@@ -74,6 +74,13 @@ class DB(commands.Cog):
         embed = discord.Embed(title="Database - leaderboard", description=lbd, color=0xffff1a)
         await ctx.send(embed=embed)
 
+    @commands.command(aliases=["helplb", "helptop"])
+    async def helpleaderboard(self, ctx):
+        embed = discord.Embed(title="Help - Leaderboards",
+                              description="Returns top 10 global players",
+                              color=0xffff1a)
+        await ctx.send(embed=embed)
+
     async def get_lb(self):
         try:
             conn = engine.connect()
@@ -92,7 +99,7 @@ class DB(commands.Cog):
     # user id can be provided as arg if theres no user mentions in the message
     @commands.command(aliases=["ru"])
     @commands.has_permissions(manage_guild=True)
-    async def remove_user_from_db(self, ctx, arg):
+    async def remove_user(self, ctx, arg):
         if ctx.message.mentions:
             for user in ctx.message.mentions:
                 await DB.remove_user(ctx, user.id)
@@ -101,6 +108,13 @@ class DB(commands.Cog):
         else:
             embed = discord.Embed(title="Database - users", description=f"No argument provided!", color=0xff3434)
             await ctx.send(embed=embed)
+
+    @commands.command(aliases=["helpru"])
+    async def helpremove_user(self, ctx):
+        embed = discord.Embed(title="Help - Remove User",
+                              description="Removes mentioned user(s) from the database. It can parse multiple mentions ( User requires manage server permission to execute this command)",
+                              color=0xffff1a)
+        await ctx.send(embed=embed)
 
 
 def setup(bot):

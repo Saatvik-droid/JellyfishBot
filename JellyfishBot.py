@@ -7,6 +7,7 @@ from datetime import datetime
 from config import TOKEN
 
 bot = commands.Bot(command_prefix=commands.when_mentioned_or("=="))
+bot.remove_command("help")
 
 bot.start_time = datetime.now()
 
@@ -34,6 +35,10 @@ async def uptime(ctx):
     except commands.BotMissingPermissions:
         await ctx.send("Bot missing permissions")
 
+@bot.command(aliases=["helpuptime"])
+async def helpup(ctx):
+    embed = discord.Embed(title="Help - Uptime", description="time since the last restart", color=0xffff1a)
+    await ctx.send(embed=embed)
 
 # reload cogs, for hot reloading without restarting the bot
 @bot.command(hidden=True)
@@ -63,6 +68,12 @@ async def reload(ctx, cog: str = None):
 
     await ctx.send(f"Successfully reloaded {cog}")
 
+@bot.command()
+@commands.is_owner()
+async def helpreload(ctx):
+    embed = discord.Embed(title="Help - Reloading", description="reloads a specific cog ", color=0xffff1a)
+    await ctx.send(embed=embed)
+
 # loading all cogs on start
 for filename in os.listdir(r"./cogs"):
     if filename.endswith(".py") and not filename.startswith("_"):
@@ -71,5 +82,24 @@ for filename in os.listdir(r"./cogs"):
         except Exception as error:
             print(f"{filename} could'nt be loaded")
             raise error
+
+
+@bot.command()
+async def help(ctx):
+    embed = discord.Embed(title="Help",
+                          description=f"""
+                                            uptime - time since the last restart
+                                            set - set channel to spawn(must #-mention the channel)
+                                            force - forces a jelly spawn in channel provided as an argument
+                                            getspawn - returns a list of channels in the spawn queue
+                                            removespawn - removes provided channel from the spawn queue
+                                            score - returns score for mentioned user or for self if no user mentioned
+                                            lb - returns the top 10 players
+                                            ru - removes mentioned user from the database effectively resetting their score
+
+                                            Do helpset and so and so forth to get command specific help
+                                       """,
+                          color=0xffff1a)
+    await ctx.send(embed=embed)
 
 bot.run(TOKEN)

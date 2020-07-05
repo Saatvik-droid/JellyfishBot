@@ -14,7 +14,7 @@ class Catcher(commands.Cog):
     @commands.Cog.listener("on_message")
     async def catcher_watch(self, message):
         for user in message.mentions:
-            if user.id == self.bot.user.id and message.channel.id in CATCH_PENDING_ID:
+            if user.id != self.bot.user.id and message.channel.id in CATCH_PENDING_ID:
                 await DB.update_score(message.author.id)
 
     # get score of a particular user
@@ -33,6 +33,13 @@ class Catcher(commands.Cog):
         else:
             score = await DB.check_db_score(ctx.author.id)
             await self.display_score(ctx, ctx.author.id, score)
+
+    @commands.command()
+    async def helpscore(self, ctx):
+        embed = discord.Embed(title="Help - Score",
+                              description="Returns score of mentioned user. Can parse only one user at a time.",
+                              color=0xffff1a)
+        await ctx.send(embed=embed)
 
     @staticmethod
     async def display_score(ctx, user_id: int, score):

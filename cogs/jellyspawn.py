@@ -77,6 +77,13 @@ class JellySpawn(commands.Cog):
             except commands.BotMissingPermissions:
                 await ctx.send("Bot missing permissions")
 
+    @commands.command(aliases=["helpsetspawn", "helpsetchannel", "helpss", "helpsc"])
+    async def helpset(self, ctx):
+        embed = discord.Embed(title="Help - Set Spawn",
+                              description="Sets channel for jelly to spawn. You have to #mention every channel. It can parse multiple mentions (User needs manage channels permission to execute this command)\nAlternate names-> setspawn, setchannel, sc, ss",
+                              color=0xffff1a)
+        await ctx.send(embed=embed)
+
     @commands.command(aliases=["spawn", "force", "fs"], hidden=True)
     @commands.has_permissions(manage_channels=True)
     async def forcespawn(self, ctx):
@@ -87,6 +94,13 @@ class JellySpawn(commands.Cog):
                 await self.spawn_jelly(channel_id=channel_id)
         except commands.MissingPermissions:
             await ctx.send("You do not have adequate permissions")
+
+    @commands.command(aliases=["helpspawn", "helpforce", "helpfs"])
+    async def helpforcespawn(self, ctx):
+        embed = discord.Embed(title="Help - Force Spawn",
+                              description="Forces the bot to spawn a jelly. You have to #mention every channel. It can parse multiple mentions (User needs manage channels permissions to execute this command)\nAlternate names-> force, spawn, fs",
+                              color=0xffff1a)
+        await ctx.send(embed=embed)
 
     # get channels it currently spawns in
     @commands.command(aliases=["get", "getspawn", "getchannel", "gc", "gs"])
@@ -105,9 +119,16 @@ class JellySpawn(commands.Cog):
         except commands.BotMissingPermissions:
             await ctx.send("Bot missing permissions")
 
+    @commands.command(aliases=["helpgetspawn", "helpgetchannel", "helpgc", "helpgs"])
+    async def helpget(self, ctx):
+        embed = discord.Embed(title="Help - Get Spawn",
+                              description="Get channels the bot spawns jellies in.\nAlternate names-> getspawn, getchannel, gc, gs",
+                              color=0xffff1a)
+        await ctx.send(embed=embed)
+
     # remove channel from list
     @commands.command(aliases=["remove", "removespawn", "removechannel", "rc", "rs"])
-    @commands.has_permissions(manage_guild=True)
+    @commands.has_permissions(manage_channels=True)
     async def remove_spawn_channel(self, ctx):
         channels = ctx.message.raw_channel_mentions
         channels_in = ""
@@ -131,6 +152,13 @@ class JellySpawn(commands.Cog):
             await ctx.send("You do not have adequate permissions")
         except commands.BotMissingPermissions:
             await ctx.send("Bot missing permissions")
+
+    @commands.command(aliases=["helpremovespawn", "helpremovechannel", "helprc", "helprs"])
+    async def helpremove(self, ctx):
+        embed = discord.Embed(title="Help - Remove Spawn",
+                              description="Removes #mentioned channels from the queue. It can parse multiple channles (User needs manage channels permission to execute this command)\nAlternate names-> removechannel, removespawn, rs , rc",
+                              color=0xffff1a)
+        await ctx.send(embed=embed)
 
 
 def setup(bot):
