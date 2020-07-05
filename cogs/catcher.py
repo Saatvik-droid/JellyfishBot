@@ -4,6 +4,7 @@ from discord.ext import commands
 from config import CATCH_PENDING_ID
 from .db import *
 
+
 class Catcher(commands.Cog):
 
     def __init__(self, bot):
@@ -14,8 +15,7 @@ class Catcher(commands.Cog):
     async def catcher_watch(self, message):
         for user in message.mentions:
             if user.id == self.bot.user.id and message.channel.id in CATCH_PENDING_ID:
-                await DB.update_score(self, message.author.id)
-                await message.channel.send(f"Congratulations <@{message.author.id}> caught a jelly")
+                await DB.update_score(message.author.id)
 
     # get score of a particular user
     # if no user mentioned it assumes msg author
@@ -25,22 +25,27 @@ class Catcher(commands.Cog):
         if ctx.message.mentions:
             for user in ctx.message.mentions:
                 if user is not None:
-                    score = await DB.check_db_score(self, user.id)
+                    score = await DB.check_db_score(user.id)
                     await self.display_score(ctx, user.id, score)
         elif arg is not None:
-            score = await DB.check_db_score(self, arg)
+            score = await DB.check_db_score(arg)
             await self.display_score(ctx, arg, score)
         else:
-            score = await DB.check_db_score(self, ctx.author.id)
+            score = await DB.check_db_score(ctx.author.id)
             await self.display_score(ctx, ctx.author.id, score)
 
-    async def display_score(self, ctx, user_id: int, score):
-        if score is not None:
-            await ctx.send(f"<@{user_id}> has {score}")
-        else:
-            await ctx.send(f"<@{user_id}> Not listed")
+    @staticmethod
+    async def display_score(ctx, user_id: int, score):
+        try:
+            if score is not None:
+                embed = discord.Embed(title="Score", description=f"<@{user_id}> has {score} points", color=0x00FF00)
+                await ctx.send(embed=embed)
+            else:
+                embed = discord.Embed(title="Score", description=f"<@{user_id}> Not listed", color=0xff3434)
+                await ctx.send(embed=embed)
+        except commands.BotMissingPermissions:
+            await ctx.send("Bot missing permissions")
 
 
 def setup(bot):
     bot.add_cog(Catcher(bot))
-

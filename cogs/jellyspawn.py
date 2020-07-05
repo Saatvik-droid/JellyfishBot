@@ -7,6 +7,7 @@ import random
 from ._jelly import Jelly
 from config import SPAWN_CHANNELS_ID, CATCH_PENDING_ID
 
+
 class JellySpawn(commands.Cog):
 
     def __init__(self, bot):
@@ -21,7 +22,10 @@ class JellySpawn(commands.Cog):
         jelly = await self.jelly_obj.get_random_jelly()
         if channel_id is not None:
             channel = self.bot.get_channel(channel_id)
-            await channel.send(file=discord.File(jelly))
+            try:
+                await channel.send(file=discord.File(jelly))
+            except commands.BotMissingPermissions:
+                await channel.send("Bot missing permissions")
             if channel_id not in CATCH_PENDING_ID:
                 CATCH_PENDING_ID.append(channel_id)
             else:
@@ -29,7 +33,10 @@ class JellySpawn(commands.Cog):
         else:
             for channel_id in SPAWN_CHANNELS_ID:
                 channel = self.bot.get_channel(channel_id)
-                await channel.send(file=discord.File(jelly))
+                try:
+                    await channel.send(file=discord.File(jelly))
+                except commands.BotMissingPermissions:
+                    await channel.send("Bot missing permissions")
                 if channel_id not in CATCH_PENDING_ID:
                     CATCH_PENDING_ID.append(channel_id)
                 else:
@@ -57,41 +64,74 @@ class JellySpawn(commands.Cog):
         channels = ctx.message.raw_channel_mentions
         for channel in channels:
             channel_id = self.bot.get_channel(channel).id
-            if channel_id not in SPAWN_CHANNELS_ID:
-                SPAWN_CHANNELS_ID.append(channel_id)
-                await ctx.send(f"Added channel <#{channel_id}>")
-            else:
-                await ctx.send(f"<#{channel_id}> already in the list")
+            try:
+                if channel_id not in SPAWN_CHANNELS_ID:
+                    SPAWN_CHANNELS_ID.append(channel_id)
+                    embed = discord.Embed(title="Spawn channel", description=f"<#{channel_id}> SUCCESSFULY ADDED!", color=0x00FF00)
+                    await ctx.send(embed=embed)
+                else:
+                    embed = discord.Embed(title="Spawn channel", description=f"<#{channel_id}> FAILED!\n\n (already in the list)", color=0xff3434)
+                    await ctx.send(embed=embed)
+            except commands.MissingPermissions:
+                await ctx.send("You do not have adequate permissions")
+            except commands.BotMissingPermissions:
+                await ctx.send("Bot missing permissions")
 
     @commands.command(aliases=["spawn", "force", "fs"], hidden=True)
     @commands.has_permissions(manage_channels=True)
     async def forcespawn(self, ctx):
-        channels = ctx.message.raw_channel_mentions
-        for channel in channels:
-            channel_id = self.bot.get_channel(channel).id
-            await self.spawn_jelly(channel_id=channel_id)
+        try:
+            channels = ctx.message.raw_channel_mentions
+            for channel in channels:
+                channel_id = self.bot.get_channel(channel).id
+                await self.spawn_jelly(channel_id=channel_id)
+        except commands.MissingPermissions:
+            await ctx.send("You do not have adequate permissions")
 
     # get channels it currently spawns in
     @commands.command(aliases=["get", "getspawn", "getchannel", "gc", "gs"])
     async def get_spawn_channel(self, ctx):
-        if not SPAWN_CHANNELS_ID:
-            await ctx.send("No channels selected")
-        else:
-            for channel_id in SPAWN_CHANNELS_ID:
-                await ctx.send(f"currently spawns in <#{channel_id}>")
+        channels = ""
+        try:
+            if not SPAWN_CHANNELS_ID:
+                embed = discord.Embed(title="Spawn channel", description=f"No channels selected", color=0xffff1a)
+                await ctx.send(embed=embed)
+            else:
+                for channel_id in SPAWN_CHANNELS_ID:
+                    channels += f"<#{channel_id}>"
+            if channels != "":
+                embed = discord.Embed(title="Spawn channel", description=f"Currently spawns in {channels}", color=0xffff1a)
+                await ctx.send(embed=embed)
+        except commands.BotMissingPermissions:
+            await ctx.send("Bot missing permissions")
 
     # remove channel from list
     @commands.command(aliases=["remove", "removespawn", "removechannel", "rc", "rs"])
     @commands.has_permissions(manage_guild=True)
     async def remove_spawn_channel(self, ctx):
         channels = ctx.message.raw_channel_mentions
-        for channel in channels:
-            channel_id = self.bot.get_channel(channel).id
-            if channel_id in SPAWN_CHANNELS_ID:
-                SPAWN_CHANNELS_ID.remove(channel_id)
-                await ctx.send(f"<#{channel_id}> was removed.")
-            else:
-                await ctx.send(f"<#{channel_id}> wasnt in the queue.")
+        channels_in = ""
+        channels_not = ""
+        try:
+            for channel in channels:
+                channel_id = self.bot.get_channel(channel).id
+                if channel_id in SPAWN_CHANNELS_ID:
+                    SPAWN_CHANNELS_ID.remove(channel_id)
+                    channels_in = ""
+                    channels_in += f"<#{channel_id}>"
+                else:
+                    channels_not = f"<#{channel_id}>"
+            if channels_in != "":
+                embed = discord.Embed(title="Spawn channel", description=f"{channels_in} SUCCESSFULY REMOVED!", color=0x00FF00)
+                await ctx.send(embed=embed)
+            if channels_not != "":
+                embed = discord.Embed(title="Spawn channel", description=f"{channels_not} FAILED!\n\n (not in the queue)", color=0xff3434)
+                await ctx.send(embed=embed)
+        except commands.MissingPermissions:
+            await ctx.send("You do not have adequate permissions")
+        except commands.BotMissingPermissions:
+            await ctx.send("Bot missing permissions")
+
 
 def setup(bot):
     bot.add_cog(JellySpawn(bot))
