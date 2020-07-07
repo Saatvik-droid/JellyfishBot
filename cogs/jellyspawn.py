@@ -142,21 +142,22 @@ class Jellyspawn(commands.Cog):
                               color=0xffff1a)
         await ctx.send(embed=embed)
 
-    @staticmethod
-    def remove_dupli(curr_channel):
-        for channel in CATCH_PENDING:
-            if channel == curr_channel:
-                CATCH_PENDING.remove(channel)
-
     async def send_image(self, channel_id):
+        jelly = Jelly()
         channel = self.bot.get_channel(channel_id)
         try:
-            jelly = Jelly()
             await channel.send(file=discord.File(jelly.image))
         except commands.BotMissingPermissions:
             await channel.send("Bot missing permissions")
-        self.remove_dupli(channel_id)
-        CATCH_PENDING.append(channel_id)
+        remove_dupli(channel_id)
+        jelly.channel_id = channel_id
+        CATCH_PENDING.append(jelly)
+
+
+def remove_dupli(curr_channel):
+    for jelly in CATCH_PENDING:
+        if curr_channel == jelly.channel_id:
+            CATCH_PENDING.remove(jelly)
 
 
 def setup(bot):

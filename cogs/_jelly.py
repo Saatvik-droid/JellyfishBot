@@ -6,7 +6,7 @@ class Jelly:
 
     def __init__(self):
         self.image, self.score = get_random_jelly()
-        self.channel_id = None
+        self.channel_id = int()
 
     if __name__ == "__main__":
         pass

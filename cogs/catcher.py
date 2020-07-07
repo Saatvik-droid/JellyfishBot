@@ -3,10 +3,10 @@ from discord.ext import commands
 
 from config import CATCH_PENDING
 from .db import *
+from .jellyspawn import remove_dupli
 
 
 class Catcher(commands.Cog):
-
     def __init__(self, bot):
         self.bot = bot
 
@@ -14,8 +14,12 @@ class Catcher(commands.Cog):
     @commands.Cog.listener("on_message")
     async def catcher_watch(self, message):
         for user in message.mentions:
-            if user.id != self.bot.user.id and message.channel.id in CATCH_PENDING:
-                await DB.update_score(message.author.id)
+            if message.author.id != self.bot.user.id and user.id == self.bot.user.id:
+                for jelly in CATCH_PENDING:
+                    if message.channel.id == jelly.channel_id:
+                        remove_dupli(message.channel.id)
+                        CATCH_PENDING.append(jelly)
+                        await DB.update_score(message.author.id)
 
     # get score of a particular user
     # if no user mentioned it assumes msg author
