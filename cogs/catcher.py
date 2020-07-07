@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-from config import CATCH_PENDING_ID
+from config import CATCH_PENDING
 from .db import *
 
 
@@ -14,7 +14,7 @@ class Catcher(commands.Cog):
     @commands.Cog.listener("on_message")
     async def catcher_watch(self, message):
         for user in message.mentions:
-            if user.id != self.bot.user.id and message.channel.id in CATCH_PENDING_ID:
+            if user.id != self.bot.user.id and message.channel.id in CATCH_PENDING:
                 await DB.update_score(message.author.id)
 
     # get score of a particular user

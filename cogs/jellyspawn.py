@@ -5,10 +5,10 @@ import asyncio
 import random
 
 from ._jelly import Jelly
-from config import SPAWN_CHANNELS_ID, CATCH_PENDING_ID
+from config import SPAWN_CHANNELS_ID, CATCH_PENDING
 
 
-class JellySpawn(commands.Cog):
+class Jellyspawn(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
@@ -19,28 +19,11 @@ class JellySpawn(commands.Cog):
     # spawns a random jelly
     # currently doesnt stack but remove inner if cases to stack
     async def spawn_jelly(self, channel_id: int = None):
-        jelly = await self.jelly_obj.get_random_jelly()
         if channel_id is not None:
-            channel = self.bot.get_channel(channel_id)
-            try:
-                await channel.send(file=discord.File(jelly))
-            except commands.BotMissingPermissions:
-                await channel.send("Bot missing permissions")
-            if channel_id not in CATCH_PENDING_ID:
-                CATCH_PENDING_ID.append(channel_id)
-            else:
-                pass
+            await self.send_image(channel_id)
         else:
             for channel_id in SPAWN_CHANNELS_ID:
-                channel = self.bot.get_channel(channel_id)
-                try:
-                    await channel.send(file=discord.File(jelly))
-                except commands.BotMissingPermissions:
-                    await channel.send("Bot missing permissions")
-                if channel_id not in CATCH_PENDING_ID:
-                    CATCH_PENDING_ID.append(channel_id)
-                else:
-                    pass
+                await self.send_image(channel_id)
 
     # spawns random jelly every 5-30 mins
     @tasks.loop(seconds=5.0)
@@ -50,7 +33,6 @@ class JellySpawn(commands.Cog):
             self.spawner_started = True
             while True:
                 await self.spawn_jelly()
-
                 # sleep for 5-30 mins
                 # changed to secs for testing
                 await asyncio.sleep(random.randint(1, 5))
@@ -160,6 +142,22 @@ class JellySpawn(commands.Cog):
                               color=0xffff1a)
         await ctx.send(embed=embed)
 
+    @staticmethod
+    def remove_dupli(curr_channel):
+        for channel in CATCH_PENDING:
+            if channel == curr_channel:
+                CATCH_PENDING.remove(channel)
+
+    async def send_image(self, channel_id):
+        channel = self.bot.get_channel(channel_id)
+        try:
+            jelly = Jelly()
+            await channel.send(file=discord.File(jelly.image))
+        except commands.BotMissingPermissions:
+            await channel.send("Bot missing permissions")
+        self.remove_dupli(channel_id)
+        CATCH_PENDING.append(channel_id)
+
 
 def setup(bot):
-    bot.add_cog(JellySpawn(bot))
+    bot.add_cog(Jellyspawn(bot))
