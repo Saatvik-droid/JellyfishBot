@@ -20,6 +20,7 @@ class JellySpawn(commands.Cog):
     # currently doesnt stack but remove inner if cases to stack
     async def spawn_jelly(self, channel_id: int = None):
         jelly = await self.jelly_obj.get_random_jelly()
+        print(jelly)
         if channel_id is not None:
             channel = self.bot.get_channel(channel_id)
             try:

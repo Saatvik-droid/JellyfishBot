@@ -35,10 +35,12 @@ async def uptime(ctx):
     except commands.BotMissingPermissions:
         await ctx.send("Bot missing permissions")
 
+
 @bot.command(aliases=["helpuptime"])
 async def helpup(ctx):
     embed = discord.Embed(title="Help - Uptime", description="time since the last restart", color=0xffff1a)
     await ctx.send(embed=embed)
+
 
 # reload cogs, for hot reloading without restarting the bot
 @bot.command(hidden=True)
@@ -67,6 +69,7 @@ async def reload(ctx, cog: str = None):
         await ctx.send(f"{cog} could'nt be reloaded")
 
     await ctx.send(f"Successfully reloaded {cog}")
+
 
 @bot.command()
 @commands.is_owner()
