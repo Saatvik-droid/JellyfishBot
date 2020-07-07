@@ -24,7 +24,7 @@ class Catcher(commands.Cog):
     async def get_score(self, ctx, arg=None):
         if ctx.message.mentions:
             for user in ctx.message.mentions:
-                if user is not None and user is not self.bot.user:
+                if user is not None:
                     score = await DB.check_db_score(user.id)
                     await self.display_score(ctx, user.id, score)
         elif arg is not None:
