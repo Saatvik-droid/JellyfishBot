@@ -1,5 +1,6 @@
 import os
 import random
+from datetime import datetime
 
 
 class Jelly:
@@ -7,6 +8,7 @@ class Jelly:
     def __init__(self):
         self.image, self.score = get_random_jelly()
         self.channel_id = int()
+        self.spawn_time = datetime.now()
 
     if __name__ == "__main__":
         pass

@@ -1,9 +1,11 @@
 import discord
 from discord.ext import commands
 
+from datetime import datetime
+import random
+
 from config import CATCH_PENDING
 from .db import *
-from .jellyspawn import remove_dupli
 
 
 class Catcher(commands.Cog):
@@ -13,13 +15,31 @@ class Catcher(commands.Cog):
     # watches all channels for jelly catching
     @commands.Cog.listener("on_message")
     async def catcher_watch(self, message):
+        current_time = datetime.now()
         for user in message.mentions:
             if message.author.id != self.bot.user.id and user.id == self.bot.user.id:
                 for jelly in CATCH_PENDING:
                     if message.channel.id == jelly.channel_id:
-                        remove_dupli(message.channel.id)
-                        CATCH_PENDING.append(jelly)
-                        await DB.update_score(message.author.id)
+                        if not await self.sting_check(jelly, current_time):
+                            await DB.update_score(message.author.id)
+                            CATCH_PENDING.remove(jelly)
+                        else:
+                            embed = discord.Embed(title="STING", description="HAHAHAHA you got stung", color=0xffff1a)
+                            await message.channel.send(embed=embed)
+
+    @staticmethod
+    async def sting_check(jelly, current_time):
+        diff_time = current_time - jelly.spawn_time
+        sting_factor = (diff_time.seconds * jelly.score) + 50
+        if sting_factor < jelly.score * random.randint(1, 10) +10:
+            print(f"sting score {diff_time.seconds}")
+            return True
+        elif random.randint(1, 10) > 8:
+            print("sting rand")
+            return True
+        print("not sting")
+        return False
+
 
     # get score of a particular user
     # if no user mentioned it assumes msg author
