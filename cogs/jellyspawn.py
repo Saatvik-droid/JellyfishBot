@@ -8,17 +8,17 @@ from ._jelly import Jelly
 from config import SPAWN_CHANNELS_ID, CATCH_PENDING
 
 
-class JellySpawn(commands.Cog):
+class Jellyspawn(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
         self.spawner_started = False
+        self.jelly_obj = Jelly()
         self.random_spawner.start()
 
     # spawns a random jelly
     # currently doesnt stack but remove inner if cases to stack
     async def spawn_jelly(self, channel_id: int = None):
-        # for forcespawn commands
         if channel_id is not None:
             await self.send_image(channel_id)
         else:
@@ -33,7 +33,6 @@ class JellySpawn(commands.Cog):
             self.spawner_started = True
             while True:
                 await self.spawn_jelly()
-
                 # sleep for 5-30 mins
                 # changed to secs for testing
                 await asyncio.sleep(random.randint(1, 5))
@@ -143,23 +142,23 @@ class JellySpawn(commands.Cog):
                               color=0xffff1a)
         await ctx.send(embed=embed)
 
-    @staticmethod
-    def remove_dupli(current_channel):
-        for channel in CATCH_PENDING:
-            if channel == current_channel:
-                CATCH_PENDING.remove(channel)
-
     async def send_image(self, channel_id):
+        jelly = Jelly()
         channel = self.bot.get_channel(channel_id)
         try:
-            jelly = Jelly()
             await channel.send(file=discord.File(jelly.image))
-            Jelly.channel_id = channel_id
-            self.remove_dupli(channel_id)
-            CATCH_PENDING.append(channel_id)
         except commands.BotMissingPermissions:
             await channel.send("Bot missing permissions")
+        remove_dupli(channel_id)
+        jelly.channel_id = channel_id
+        CATCH_PENDING.append(jelly)
+
+
+def remove_dupli(curr_channel):
+    for jelly in CATCH_PENDING:
+        if curr_channel == jelly.channel_id:
+            CATCH_PENDING.remove(jelly)
 
 
 def setup(bot):
-    bot.add_cog(JellySpawn(bot))
+    bot.add_cog(Jellyspawn(bot))
